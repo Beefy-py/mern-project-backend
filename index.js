@@ -14,7 +14,7 @@ app.use(cors());
 
 app.use("/posts", posts);
 app.get("/", (req, res) => {
-  res.send("Hello To You From Poster MERN!👋🏾");
+  res.send("Hello To You From Poster MERN!👋🏽🙂");
 });
 
 const PORT = process.env.PORT || 5000;

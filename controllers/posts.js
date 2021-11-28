@@ -30,11 +30,10 @@ module.exports.createPost = async (req, res) => {
 module.exports.updatePost = async (req, res) => {
   const { id: postId } = req.params;
 
-  console.log(req.body.tags, typeof req.body.tags);
-
-  const tags = req.body.tags.includes(",")
-    ? req.body.tags.split(",")
-    : req.body.tags.split(" ");
+  const tags =
+    typeof req.body.tags === "object"
+      ? req.body.tags.join(",").split(",")
+      : req.body.tags.split(",");
   const post = { ...req.body, tags };
 
   if (!mongoose.Types.ObjectId.isValid(postId))
