@@ -1,18 +1,31 @@
 const mongoose = require("mongoose");
 const { Post } = require("../models/posts");
+const { Comment } = require("../models/comments");
 
 module.exports.getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().sort("createdAt");
+    const posts = await Post.find().sort("-createdAt");
     res.status(200).send(posts);
   } catch (err) {
     res.status(404).send(err.message);
   }
 };
 
-module.exports.createPost = async (req, res) => {
-  console.log(req.body.tags, typeof req.body.tags);
+module.exports.getSinglePost = async (req, res) => {
+  const { id: postId } = req.params;
 
+  if (!mongoose.Types.ObjectId.isValid(postId))
+    return res.status(404).send("Not a valid Id for a post.");
+
+  try {
+    const post = await Post.findById(postId);
+    res.status(200).send(post);
+  } catch (err) {
+    res.status(404).send("Post not found");
+  }
+};
+
+module.exports.createPost = async (req, res) => {
   const tags = req.body.tags.includes(",")
     ? req.body.tags.split(",")
     : req.body.tags.split(" ");
@@ -93,3 +106,17 @@ module.exports.reactPost = async (req, res) => {
 
   res.send(updatePost);
 };
+
+// module.exports.getComments = async (req, res) => {
+//   const { id: postId } = req.params;
+
+//   if (!mongoose.Types.ObjectId.isValid(postId))
+//     return res.status(404).send("Not a valid Id for a post.");
+
+//   try {
+//     const postComments = await Comment.find({ postId: postId });
+//     res.status(200).send(postComments);
+//   } catch (err) {
+//     res.status(404).send("comments not found for that post id");
+//   }
+// };
