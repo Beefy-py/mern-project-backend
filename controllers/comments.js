@@ -29,3 +29,37 @@ module.exports.createComment = async (req, res) => {
     res.status(400).send(err);
   }
 };
+
+module.exports.updateComment = async (req, res) => {
+  const { id: commentId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(commentId)) {
+    return res.status(404).send("comment with the givin id not found.");
+  }
+
+  try {
+    const updatedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      req.body,
+      { new: true }
+    );
+    res.send("updated comment to " + updatedComment.body);
+  } catch (err) {
+    console.log(err);
+  }
+};
+
+module.exports.deleteComment = async (req, res) => {
+  const { id: commentId } = req.params;
+
+  if (!mongoose.Types.ObjectId.isValid(commentId)) {
+    return res.status(404).send("comment with the givin id not found.");
+  }
+
+  try {
+    await Comment.findByIdAndDelete(commentId);
+    res.send("Comment succesfully deleted.");
+  } catch (err) {
+    console.log(err);
+  }
+};
