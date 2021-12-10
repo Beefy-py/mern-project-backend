@@ -30,7 +30,7 @@ module.exports.createPost = async (req, res) => {
     ? req.body.tags.split(",")
     : req.body.tags.split(" ");
   const post = { ...req.body, tags };
-  const newPost = new Post(post);
+  const newPost = new Post({ ...post, authorId: req.userId });
 
   try {
     await newPost.save();
@@ -87,20 +87,39 @@ module.exports.reactPost = async (req, res) => {
   const { id: postId } = req.params;
   const { like } = req.query;
 
+  if (!req.userId) return res.status(403).send("Unauthenticated.");
+
   if (!mongoose.Types.ObjectId.isValid(postId))
     return res.status(404).send("Not a valid Id for a post.");
 
   const post = await Post.findById(postId);
 
-  // decide like/dislike
-  const reaction =
-    like === "1"
-      ? { likeCount: post.likeCount + 1 }
-      : { dislikeCount: post.dislikeCount + 1 };
+  if (like === "1") {
+    const index = post.likes.findIndex((usrID) => usrID === String(req.userId));
 
-  console.log(post.title, reaction);
+    if (index === -1) {
+      post.likes.push(req.userId);
+      post.dislikes = post.dislikes.filter(
+        (usrID) => usrID !== String(req.userId)
+      );
+    } else {
+      post.likes = post.likes.filter((usrID) => usrID !== String(req.userId));
+    }
+  } else {
+    const index = post.dislikes.findIndex(
+      (usrID) => usrID === String(req.userId)
+    );
+    if (index === -1) {
+      post.dislikes.push(req.userId);
+      post.likes = post.likes.filter((usrID) => usrID !== String(req.userId));
+    } else {
+      post.dislikes = post.dislikes.filter(
+        (usrID) => usrID !== String(req.userId)
+      );
+    }
+  }
 
-  const updatePost = await Post.findByIdAndUpdate(postId, reaction, {
+  const updatePost = await Post.findByIdAndUpdate(postId, post, {
     new: true,
   });
 

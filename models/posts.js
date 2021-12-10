@@ -3,18 +3,17 @@ const mongoose = require("mongoose");
 const postSchema = mongoose.Schema({
   title: { type: String, required: true },
   message: { type: String, required: true },
-  author: { type: String, required: true },
+  authorId: { type: String, required: true },
+  authorName: { type: String },
   tags: [String],
   selectedFile: String,
-  likeCount: {
-    type: Number,
-    default: 0,
-    min: 0,
+  likes: {
+    type: [String],
+    default: [],
   },
-  dislikeCount: {
-    type: Number,
-    default: 0,
-    min: 0,
+  dislikes: {
+    type: [String],
+    default: [],
   },
   createdAt: {
     type: Date,
