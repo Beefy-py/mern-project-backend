@@ -9,10 +9,12 @@ const {
   updatePost,
   deletePost,
   reactPost,
+  getPostsBySearch,
   // getComments,
 } = require("../controllers/posts");
 
 router.get("/", getPosts);
+router.get("/search", getPostsBySearch);
 router.post("/", auth, createPost);
 router.get("/:id", auth, getSinglePost);
 router.patch("/:id", auth, updatePost);

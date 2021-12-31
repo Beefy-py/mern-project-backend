@@ -3,9 +3,37 @@ const { Post } = require("../models/posts");
 const { Comment } = require("../models/comments");
 
 module.exports.getPosts = async (req, res) => {
+  const { page } = req.query;
+
   try {
-    const posts = await Post.find().sort("-createdAt");
-    res.status(200).send(posts);
+    const limit = 10;
+    const startIndex = (Number(page) - 1) * limit;
+    const total = await Post.countDocuments({});
+    const posts = await Post.find()
+      .sort("-createdAt")
+      .limit(limit)
+      .skip(startIndex);
+
+    res.status(200).send({
+      data: posts,
+      currentPage: Number(page),
+      numberOfPages: Math.ceil(total / limit),
+    });
+  } catch (err) {
+    res.status(404).send(err.message);
+  }
+};
+
+module.exports.getPostsBySearch = async (req, res) => {
+  const { searchQuery, tags } = req.query;
+  try {
+    const title = new RegExp(searchQuery, "i");
+
+    const posts = await Post.find({
+      $or: [{ title }, { tags: { $in: tags.split(",") } }],
+    });
+
+    res.send({ data: posts });
   } catch (err) {
     res.status(404).send(err.message);
   }
@@ -26,9 +54,16 @@ module.exports.getSinglePost = async (req, res) => {
 };
 
 module.exports.createPost = async (req, res) => {
-  const tags = req.body.tags.includes(",")
-    ? req.body.tags.split(",")
-    : req.body.tags.split(" ");
+  let tags;
+
+  if (!typeof req.body.tags === "object") {
+    tags = req.body.tags.includes(",")
+      ? req.body.tags.split(",")
+      : req.body.tags.split(" ");
+  } else {
+    tags = req.body.tags;
+  }
+
   const post = { ...req.body, tags };
   const newPost = new Post({ ...post, authorId: req.userId });
 
