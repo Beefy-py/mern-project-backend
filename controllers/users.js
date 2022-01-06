@@ -6,6 +6,17 @@ const jwt = require("jsonwebtoken");
 
 const { User } = require("../models/users");
 
+module.exports.getUsers = async (req, res) => {
+  try {
+    const users = await User.find().sort("-date_joined");
+
+    res.status(200).send(users);
+  } catch (err) {
+    console.log(err);
+    res.send("Could not get users");
+  }
+};
+
 module.exports.registerUser = async (req, res) => {
   const { firstName, lastName, username, email, password, confirmPassword } =
     req.body;
