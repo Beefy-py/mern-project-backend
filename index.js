@@ -3,7 +3,6 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 
 const posts = require("./routes/posts");
-const comments = require("./routes/comments");
 const users = require("./routes/users");
 
 require("dotenv").config();
@@ -15,10 +14,9 @@ app.use(express.urlencoded({ limit: "20mb", extended: true }));
 app.use(cors());
 
 app.use("/users", users);
-app.use("/comments", comments);
 app.use("/posts", posts);
 app.get("/", (req, res) => {
-  res.send("Hello To You From Poster MERN!👋🏽🙂");
+  res.send("Backend Server for https://poster-mern.netlify.app/");
 });
 
 const PORT = process.env.PORT || 5000;

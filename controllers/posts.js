@@ -1,12 +1,11 @@
 const mongoose = require("mongoose");
 const { Post } = require("../models/posts");
-const { Comment } = require("../models/comments");
 
 module.exports.getPosts = async (req, res) => {
   const { page } = req.query;
 
   try {
-    const limit = 10;
+    const limit = 9;
     const startIndex = (Number(page) - 1) * limit;
     const total = await Post.countDocuments({});
     const posts = await Post.find()
@@ -96,8 +95,6 @@ module.exports.updatePost = async (req, res) => {
       }
     );
 
-    console.log(updatedPost.title, updatedPost.tags);
-
     res.send(updatedPost);
   } catch (err) {
     res.status(400).send(err);
@@ -159,6 +156,21 @@ module.exports.reactPost = async (req, res) => {
   });
 
   res.send(updatePost);
+};
+
+module.exports.commentPost = async (req, res) => {
+  const { id } = req.params;
+  console.log(req.body);
+  const { authorId } = req.body;
+
+  if (!mongoose.Types.ObjectId.isValid(authorId))
+    return res.status(404).send("Not a valid Id for a post.");
+
+  const post = await Post.findById(id);
+
+  post.comments.push(req.body);
+  const updatedPost = await Post.findByIdAndUpdate(id, post, { new: true });
+  res.send(updatedPost);
 };
 
 // module.exports.getComments = async (req, res) => {
